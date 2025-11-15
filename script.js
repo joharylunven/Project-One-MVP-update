@@ -1,12 +1,15 @@
 /* ---
-Fichier: script.js (CORRIGÉ)
+Fichier: script.js (FINAL)
 --- */
 
 document.addEventListener('DOMContentLoaded', () => {
     
     // --- 1. CONFIGURATION ---
     const pages = document.querySelectorAll('.page');
-    const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook-test/analyse-site';
+    const N8N_DNA_WEBHOOK_URL = 'http://localhost:5678/webhook-test/analyse-site';
+    const N8N_CAMPAIGN_WEBHOOK_URL = 'http://localhost:5678/webhook-test/generate-campaigns'; // NOUVEAU
+
+    let currentBusinessDNA = null; // NOUVEAU: Pour mémoriser le DNA
 
     // --- 2. LOGIQUE DE NAVIGATION ---
     
@@ -21,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
         }
         
-        // --- Page 4 Logique (Conservée) ---
+        // --- Page 4 Logique (MODIFIÉE) ---
+        // Quand on affiche la page 4, on lance la génération des campagnes
         if (pageId === '#page-4') {
             triggerSuggestionLoading();
         }
     }
 
-    // --- 3. LOGIQUE D'ANALYSE (LE CŒUR DU MVP) ---
+    // --- 3. LOGIQUE D'ANALYSE (PAGE 1 -> 3) ---
 
     async function startAnalysis() {
         const urlInput = document.querySelector('#page-1 input[type="text"]');
@@ -39,11 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Changer de page et afficher le spinner
         showPage('#page-2');
-        document.querySelector('.url-display span').textContent = siteUrl; // Affiche l'URL en cours d'analyse
+        document.querySelector('.url-display span').textContent = siteUrl;
         
-        // 2. Appeler votre backend n8n local
+        // 2. Appeler le backend n8n (Webhook 1: DNA)
         try {
-            const response = await fetch(N8N_WEBHOOK_URL, {
+            const response = await fetch(N8N_DNA_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: siteUrl }),
@@ -53,125 +57,121 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
             }
 
-            // Renommé 'n8nResponse' pour plus de clarté
             const n8nResponse = await response.json(); 
-
-            // 3. Nous avons la réponse !
-            console.log('Business DNA reçu:', n8nResponse);
-
-            // --- CORRECTION ---
-            // Extrayez le VRAI objet JSON de la réponse n8n
             const dna = n8nResponse.json;
             
-            // 4. D'ABORD, naviguer vers la page 3
+            // --- NOUVEAU: Mémoriser le DNA ---
+            currentBusinessDNA = dna; 
+            
+            // 4. Afficher la page 3
             showPage('#page-3');
 
-            // 5. ENSUITE, remplir la page (AVEC LE BON OBJET)
-            populateDnaPage(dna); // <-- PROBLÈME RÉSOLU
+            // 5. Remplir la page 3
+            populateDnaPage(dna); 
 
         } catch (error) {
             console.error('Impossible de contacter n8n ou de générer le DNA:', error);
             alert(`Une erreur est survenue: ${error.message}. Vérifiez que n8n est lancé et que le CORS est configuré.`);
-            showPage('#page-1'); // Revenir à la page 1
+            showPage('#page-1'); 
         }
     }
 
-// --- 4. LOGIQUE DE REMPLISSAGE (PAGE 3) ---
+    // --- 4. LOGIQUE DE REMPLISSAGE (PAGE 3) ---
 
-function populateDnaPage(dna) {
-    // Projet
-    const projectH2 = document.querySelector('#dna-project h2');
-    if (projectH2) projectH2.textContent = dna.projectName || 'Project Name';
-    
-    const tagline = document.querySelector('.tagline-display');
-    if (tagline) tagline.textContent = dna.tagline || 'Your tagline here.';
-    
-    const websiteLink = document.querySelector('#dna-project a');
-    if (websiteLink) {
-        websiteLink.href = dna.website || '#';
-        websiteLink.textContent = dna.website || 'www.website.com';
-    }
-    
-    // Overview (AVEC SÉCURITÉ)
-    if (dna.overview) {
-        const brandNameP = document.querySelector('#dna-overview p:nth-child(1) strong');
-        if (brandNameP && brandNameP.nextSibling) {
-            brandNameP.nextSibling.textContent = ` ${dna.overview.brandName || ''}`;
-        }
-
-        const industryP = document.querySelector('#dna-overview p:nth-child(2) strong');
-        if (industryP && industryP.nextSibling) {
-            industryP.nextSibling.textContent = ` ${dna.overview.industry || ''}`;
-        }
-
-        const conceptP = document.querySelector('#dna-overview p:nth-child(3) strong');
-        if (conceptP && conceptP.nextSibling) {
-            conceptP.nextSibling.textContent = ` ${dna.overview.concept || ''}`;
-        }
-    }
-
-    // Fonts
-    if (dna.fonts) {
-        const primaryFont = document.querySelector('#dna-fonts .font-example-playfair');
-        if (primaryFont) primaryFont.textContent = dna.fonts.primary || 'Primary Font';
+    function populateDnaPage(dna) {
+        // Projet
+        const projectH2 = document.querySelector('#dna-project h2');
+        if (projectH2) projectH2.textContent = dna.projectName || 'Project Name';
         
-        const secondaryFont = document.querySelector('#dna-fonts .font-example-lato');
-        if (secondaryFont) secondaryFont.textContent = dna.fonts.secondary || 'Secondary Font';
-    }
-
-    // Tags (Aesthetic, Values, Tone)
-    populateTagList('#dna-aesthetic .tag-list', dna.aesthetic);
-    populateTagList('#dna-values .tag-list', dna.values);
-    populateTagList('#dna-tone .tag-list', dna.tone);
-
-    // Colors
-    const colorPalette = document.querySelector('#dna-colors .color-palette');
-    if (colorPalette) {
-        colorPalette.innerHTML = ''; // Vider les couleurs statiques
-        if (dna.colors && dna.colors.length > 0) {
-            dna.colors.slice(0, 5).forEach(hex => { // Limiter à 5
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.innerHTML = `
-                    <div class="swatch-circle" style="background-color: ${hex}; border: ${hex === '#FFFFFF' ? '1px solid #ccc' : 'none'}"></div>
-                    <span>${hex}</span>
-                `;
-                colorPalette.appendChild(swatch);
-            });
+        const tagline = document.querySelector('.tagline-display');
+        if (tagline) tagline.textContent = dna.tagline || 'Your tagline here.';
+        
+        const websiteLink = document.querySelector('#dna-project a');
+        if (websiteLink) {
+            websiteLink.href = dna.website || '#';
+            websiteLink.textContent = dna.website || 'www.website.com';
         }
-    }
+        
+        // Overview
+        if (dna.overview) {
+            const brandNameP = document.querySelector('#dna-overview p:nth-child(1) strong');
+            if (brandNameP && brandNameP.nextSibling) {
+                brandNameP.nextSibling.textContent = ` ${dna.overview.brandName || ''}`;
+            }
 
-    // Images
-    const imageGrid = document.querySelector('#dna-images .image-grid');
-    if (imageGrid) {
-        imageGrid.innerHTML = ''; // Vider les images statiques
-        if (dna.scrapedImages && dna.scrapedImages.length > 0) {
-            dna.scrapedImages.slice(0, 6).forEach(imgData => { // Limiter à 6
-                let src = imgData.src;
-                if (src && !src.startsWith('http') && !src.startsWith('data:')) {
-                    try {
-                        let baseUrl = new URL(dna.website);
-                        src = new URL(src, baseUrl.origin).href;
-                    } catch (e) {
-                        return; 
+            const industryP = document.querySelector('#dna-overview p:nth-child(2) strong');
+            if (industryP && industryP.nextSibling) {
+                industryP.nextSibling.textContent = ` ${dna.overview.industry || ''}`;
+            }
+
+            const conceptP = document.querySelector('#dna-overview p:nth-child(3) strong');
+            if (conceptP && conceptP.nextSibling) {
+                conceptP.nextSibling.textContent = ` ${dna.overview.concept || ''}`;
+            }
+        }
+
+        // Fonts
+        if (dna.fonts) {
+            const primaryFont = document.querySelector('#dna-fonts .font-example-playfair');
+            if (primaryFont) primaryFont.textContent = dna.fonts.primary || 'Primary Font';
+            
+            const secondaryFont = document.querySelector('#dna-fonts .font-example-lato');
+            if (secondaryFont) secondaryFont.textContent = dna.fonts.secondary || 'Secondary Font';
+        }
+
+        // Tags
+        populateTagList('#dna-aesthetic .tag-list', dna.aesthetic);
+        populateTagList('#dna-values .tag-list', dna.values);
+        populateTagList('#dna-tone .tag-list', dna.tone);
+
+        // Colors
+        const colorPalette = document.querySelector('#dna-colors .color-palette');
+        if (colorPalette) {
+            colorPalette.innerHTML = ''; 
+            if (dna.colors && dna.colors.length > 0) {
+                dna.colors.slice(0, 5).forEach(hex => { 
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.innerHTML = `
+                        <div class="swatch-circle" style="background-color: ${hex}; border: ${hex === '#FFFFFF' ? '1px solid #ccc' : 'none'}"></div>
+                        <span>${hex}</span>
+                    `;
+                    colorPalette.appendChild(swatch);
+                });
+            }
+        }
+
+        // Images
+        const imageGrid = document.querySelector('#dna-images .image-grid');
+        if (imageGrid) {
+            imageGrid.innerHTML = ''; 
+            if (dna.scrapedImages && dna.scrapedImages.length > 0) {
+                dna.scrapedImages.slice(0, 6).forEach(imgData => { 
+                    let src = imgData.src;
+                    if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                        try {
+                            let baseUrl = new URL(dna.website);
+                            src = new URL(src, baseUrl.origin).href;
+                        } catch (e) {
+                            return; 
+                        }
                     }
-                }
 
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = 'Brand image';
-                imageGrid.appendChild(img);
-            });
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = 'Brand image';
+                    imageGrid.appendChild(img);
+                });
+            }
         }
+        
+        attachLightboxListeners();
     }
-    
-    // RE-ATTACHER LA LIGHTBOX aux nouvelles images
-    attachLightboxListeners();
-}
     
     function populateTagList(selector, tags) {
         const list = document.querySelector(selector);
-        list.innerHTML = ''; // Vider les tags statiques
+        if (!list) return; // Sécurité
+        list.innerHTML = ''; 
         if (tags && tags.length > 0) {
             tags.forEach(tagText => {
                 const li = document.createElement('li');
@@ -181,7 +181,7 @@ function populateDnaPage(dna) {
         }
     }
 
-    // --- 5. LOGIQUE LIGHTBOX (Conservée et améliorée) ---
+    // --- 5. LOGIQUE LIGHTBOX (INCHANGÉE) ---
 
     const lightboxOverlay = document.getElementById('lightbox-overlay');
     const lightboxImage = document.getElementById('lightbox-image');
@@ -221,10 +221,8 @@ function populateDnaPage(dna) {
     }
 
     function attachLightboxListeners() {
-        // Cible TOUTES les images (statiques page 4, dynamiques page 3)
         const imagesToObserve = document.querySelectorAll('.image-grid img, .suggestion-image img');
         imagesToObserve.forEach(img => {
-            // Empêche de doubler les écouteurs
             img.removeEventListener('click', openLightbox); 
             img.addEventListener('click', openLightbox);
         });
@@ -235,26 +233,111 @@ function populateDnaPage(dna) {
         if (e.target === lightboxOverlay) closeLightbox();
     });
 
-    // --- 6. LOGIQUE PAGE 4 (Conservée) ---
+    // --- 6. LOGIQUE PAGE 4 (TOTALEMENT REFAITE) ---
     
-    function triggerSuggestionLoading() {
-        const suggestionCards = document.querySelectorAll('.suggestion-card');
-        suggestionCards.forEach(card => card.classList.remove('loaded'));
-        setTimeout(() => {
-            suggestionCards.forEach(card => card.classList.add('loaded'));
-        }, 5000);
+    async function triggerSuggestionLoading() {
+        // 1. Vérifier si on a le DNA
+        if (!currentBusinessDNA) {
+            console.error('Aucun DNA trouvé. Impossible de générer des campagnes.');
+            alert('Erreur: Le DNA de l\'entreprise n\'a pas été trouvé. Veuillez recommencer.');
+            showPage('#page-1');
+            return;
+        }
+
+        const suggestionGrid = document.querySelector('.suggestion-grid');
+        suggestionGrid.innerHTML = ''; // Vider la grille
+
+        // 2. Afficher 3 "squelettes" de chargement
+        for (let i = 0; i < 3; i++) {
+            const placeholder = document.createElement('article');
+            placeholder.className = 'suggestion-card';
+            placeholder.innerHTML = `
+                <div class="suggestion-image">
+                    <div class="loading-overlay"><div class="spinner"></div></div>
+                </div>
+                <div class="suggestion-content">
+                    <h3>Génération de l'idée...</h3>
+                    <p>Veuillez patienter pendant que nous contactons l'IA...</p>
+                </div>
+            `;
+            suggestionGrid.appendChild(placeholder);
+        }
+
+        // 3. Appeler n8n (Webhook 2: Campagnes) en envoyant le DNA
+        try {
+            const response = await fetch(N8N_CAMPAIGN_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentBusinessDNA) // On envoie le DNA complet
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur de l'API Gemini: ${response.statusText}`);
+            }
+
+            const n8nResponse = await response.json();
+            // On s'attend à ce que n8n renvoie { json: [ {title, description, imageUrl}, ... ] }
+            const campaigns = n8nResponse.json;
+
+            // 4. Remplir la page avec les vraies données
+            populateCampaignPage(campaigns);
+
+        } catch (error) {
+            console.error('Erreur lors de la génération des campagnes:', error);
+            suggestionGrid.innerHTML = `<p style="color: var(--color-accent-dark);">Une erreur est survenue: ${error.message}</p>`;
+        }
     }
 
-    // --- 7. INITIALISATION ---
+    // NOUVELLE FONCTION pour remplir la page 4
+    function populateCampaignPage(campaigns) {
+        const suggestionGrid = document.querySelector('.suggestion-grid');
+        suggestionGrid.innerHTML = ''; // Vider les squelettes
+
+        if (!campaigns || campaigns.length === 0) {
+            suggestionGrid.innerHTML = '<p>Impossible de générer des campagnes.</p>';
+            return;
+        }
+
+        // Créer les 3 vraies cartes
+        campaigns.forEach(campaign => {
+            const card = document.createElement('article');
+            card.className = 'suggestion-card'; // Sans la classe 'loaded'
+
+            card.innerHTML = `
+                <div class="suggestion-image">
+                    <div class="loading-overlay"><div class="spinner"></div></div>
+                    <img src="${campaign.imageUrl}" alt="${campaign.title}">
+                </div>
+                <div class="suggestion-content">
+                    <h3>${campaign.title}</h3>
+                    <p>${campaign.description}</p>
+                </div>
+            `;
+            suggestionGrid.appendChild(card);
+        });
+
+        // Forcer un "reflow" et ajouter la classe 'loaded' pour l'animation
+        // C'est ce qui déclenche la transition d'opacité sur l'image
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.suggestion-grid .suggestion-card');
+            cards.forEach(card => card.classList.add('loaded'));
+        }, 100);
+
+        // Rattacher les écouteurs de la lightbox aux nouvelles images
+        attachLightboxListeners();
+    }
+
+    // --- 7. INITIALISATION (Légèrement modifiée) ---
     
-    // Gérer tous les liens de navigation SAUF le bouton d'analyse
+    // Gérer tous les liens de navigation
     const navLinks = document.querySelectorAll('a[href^="#page-"]');
     navLinks.forEach(link => {
-        if (link.id !== 'start-analysis') { // On exclut notre bouton spécial
+        // Exclure le bouton d'analyse qui a sa propre logique
+        if (link.id !== 'start-analysis') { 
             link.addEventListener('click', (e) => {
                 e.preventDefault(); 
                 const targetId = link.getAttribute('href');
-                showPage(targetId);
+                showPage(targetId); // Le clic sur "Looks good" (page-4) est géré ici
             });
         }
     });
@@ -272,7 +355,7 @@ function populateDnaPage(dna) {
     const fallbackLink = document.querySelector('.generation-complete-link');
     if (fallbackLink) fallbackLink.style.display = 'none';
     
-    // Attacher la lightbox aux images statiques (page 4)
+    // Attacher la lightbox aux images statiques (s'il y en avait)
     attachLightboxListeners();
 
     // Afficher la page initiale
