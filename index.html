@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project One</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main id="page-1" class="page">
+        <section class="center-card">
+            <h1 class="page-1-title">Project One</h1>
+            
+            <h2>Enter your website</h2>
+
+            <p>We'll analyze your business and generate your Business DNA</p>
+            <div class="onboarding-form">
+                <input type="text" placeholder="www.example.com">
+                <a href="#page-2" class="button" id="start-analysis">Continue</a>
+            </div>
+        </section>
+    </main>
+
+    <main id="page-2" class="page">
+        <section class="center-card">
+            <a href="#page-1" class="back-button">&larr; Back</a>
+            <h1>Generating your Business DNA</h1>
+            <p>We're researching and analyzing your business. It will take several minutes. Feel free to come back later.</p>
+            
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <span>Analyzing your website</span>
+            </div>
+
+            <div class="url-display">
+                <span></span> </div>
+
+            <p class="time-display">About 15 seconds left</p>
+
+            <a href="#page-3" class="generation-complete-link">Click here when generation is complete</a>
+        </section>
+    </main>
+
+    <main id="page-3" class="page">
+        <div class="container">
+            <a href="#page-2" class="back-button">&larr; Back</a>
+            <header class="page-header">
+                <h1>Your Business DNA</h1>
+                <p>Here is a snapshot of your business that we'll use to create social media campaigns.<br>Feel free to edit this at anytime.</p>
+            </header>
+
+            <div class="dna-grid">
+                
+                <section class="dna-card" id="dna-project">
+                    <h2></h2> <div class="project-header">
+                        <div class="logo-placeholder">
+                            <img src="images/logo.png" alt="Project One Logo Placeholder">
+                        </div>
+                        <blockquote class="tagline-display"></blockquote> </div>
+                    <a href="#" target="_blank" rel="noopener noreferrer"></a> </section>
+
+                <section class="dna-card" id="dna-colors">
+                    <h2>Colors</h2>
+                    <div class="color-palette">
+                        </div>
+                </section>
+
+                <section class="dna-card" id="dna-aesthetic">
+                    <h2>Brand Aesthetic</h2>
+                    <ul class="tag-list">
+                        </ul>
+                </section>
+
+                <section class="dna-card" id="dna-fonts">
+                    <h2>Fonts</h2>
+                    <div class="font-container">
+                        <div class="font-display">
+                            <span class="font-name">Primary / Headline</span>
+                            <span class="font-example-playfair"></span> </div>
+                        <div class="font-display">
+                            <span class="font-name">Secondary / Body</span>
+                            <span class="font-example-lato"></span> </div>
+                    </div>
+                </section>
+
+                <section class="dna-card" id="dna-values">
+                    <h2>Brand Values</h2>
+                    <ul class="tag-list">
+                        </ul>
+                </section>
+
+                <section class="dna-card" id="dna-tone">
+                    <h2>Brand Tone of Voice</h2>
+                    <ul class="tag-list">
+                        </ul>
+                </section>
+
+                <section class="dna-card" id="dna-images">
+                    <h2>Images</h2>
+                    <div class="image-grid">
+                        </div>
+                </section>
+
+                <section class="dna-card" id="dna-overview">
+                    <h2>Business Overview</h2>
+                    <p><strong>Brand Name:</strong></p>
+                    <p><strong>Industry:</strong></p>
+                    <p><strong>Concept:</strong></p>
+                </section>
+
+            </div> 
+            
+            <footer class="page-footer">
+                <p>Next we'll use your Business DNA to generate social media campaigns</p>
+                <a href="#page-4" class="button">Looks good</a>
+            </footer>
+
+        </div> 
+    </main>
+
+    <main id="page-4" class="page">
+        <div class="container">
+            <header class="home-header">
+                <div class="logo-text">Project One</div>
+                <nav>
+                    <a href="#page-1">Home</a>
+                </nav>
+            </header>
+            
+            <section class="campaign-prompt">
+                <h2>Home</h2>
+                <p>Start from our suggestions or prompt to create a new campaign.</p>
+                <form class="prompt-form" onsubmit="event.preventDefault();">
+                    <label for="campaign_description" class="sr-only">Describe the campaign you want to create</label>
+                    <input type="text" id="campaign_description" placeholder="Describe the campaign you want to create">
+                    <button type="submit" class="button">Suggest ideas</button>
+                </form>
+            </section>
+
+            <section class="suggestions-section">
+                <h2>Suggestions based on Business DNA</h2>
+                <div class="suggestion-grid">
+                    </div> 
+            </section>
+        </div> 
+    </main>
+    
+    <div id="lightbox-overlay">
+        <span id="lightbox-close">&times;</span>
+        <div id="lightbox-wrapper">
+            <div id="lightbox-content">
+                <img id="lightbox-image" src="" alt="Enlarged view">
+            </div>
+            <div id="lightbox-caption">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-description"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

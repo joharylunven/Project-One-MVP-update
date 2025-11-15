@@ -1,0 +1,758 @@
+/* ---
+File: style.css
+--- */
+
+/* --- 1. Font Import & CSS Variables --- */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap');
+
+:root {
+    /* Project One Palette */
+    --color-primary: #F5F0E9;      /* Lab Note */
+    --color-secondary: #B0B4B8;    /* Trace Silver */
+    --color-accent: #A18B56;       /* Burnt Gold */
+    --color-accent-dark: #8C2B28;  /* Codex Red */
+    --color-bg-card: #1A1A1A;       /* Ink Black */
+    
+    /* General UI Palette */
+    --color-bg-dark: #1c1c1c;       /* Dark background from screenshots */
+    --color-border-subtle: #2a2a2a; /* Subtle border for cards */
+    --color-border-light: #444;    /* Lighter border for inputs */
+
+    /* Typography */
+    --font-primary: 'Playfair Display', serif;
+    --font-secondary: 'Lato', sans-serif;
+}
+
+
+/* --- 2. Global Reset & Body Styles --- */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-bg-dark);
+    color: var(--color-secondary);
+    font-family: var(--font-secondary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.lightbox-active {
+    overflow: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--color-primary);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+
+/* --- 3. Page Navigation (JS-driven) --- */
+.page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.page.page-active {
+    display: flex;
+    opacity: 1;
+}
+
+#page-3.page-active,
+#page-4.page-active {
+    justify-content: flex-start;
+}
+
+
+/* --- 4. Reusable Components --- */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.button {
+    display: inline-block;
+    background-color: var(--color-accent);
+    color: var(--color-bg-card);
+    padding: 0.8rem 2.5rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: var(--font-secondary);
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-bg-card);
+}
+
+.center-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 16px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 550px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.back-button {
+    position: absolute;
+    top: 2.5rem;
+    left: 2.5rem;
+    font-size: 1rem;
+    color: var(--color-secondary);
+    z-index: 10;
+}
+
+.back-button:hover {
+    color: var(--color-primary);
+}
+
+/* Spinner used on Page 2 and Page 4 */
+.spinner {
+    border: 4px solid var(--color-border-light);
+    border-top: 4px solid var(--color-accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* --- 5. Page 1: Onboarding --- */
+
+.page-1-title {
+    font-size: 3rem; /* This makes it big */
+    font-family: var(--font-primary);
+    color: var(--color-primary);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+#page-1 .center-card h2 {
+    font-size: 1.5rem; /* This styles the smaller "Enter your website" text */
+    margin-bottom: 0.5rem;
+}
+
+.onboarding-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.onboarding-form input[type="text"] {
+    background-color: var(--color-border-subtle);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-primary);
+    padding: 1rem;
+    border-radius: 12px;
+    width: 100%;
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    text-align: center;
+}
+
+
+/* --- 6. Page 2: Generating --- */
+
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.spinner-container span {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+.url-display {
+    background-color: var(--color-border-subtle);
+    border: 1px solid var(--color-border-light);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--color-secondary);
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.time-display {
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.generation-complete-link {
+    display: none; 
+}
+
+
+/* --- 7. Page 3: Your Business DNA --- */
+
+#page-3 .page-header {
+    text-align: center;
+    margin: 2rem 0 3rem 0;
+}
+
+#page-3 .page-header p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* UPDATED 3-COLUMN LAYOUT */
+.dna-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* Rows are defined by content in col 1 & 2 */
+    grid-template-rows: auto auto auto;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.dna-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+}
+
+.dna-card h2 {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding-bottom: 0.5rem;
+}
+
+/* --- Card Layout Assignment --- */
+#dna-project   { grid-column: 1 / 2; grid-row: 1 / 2; }
+#dna-colors    { grid-column: 1 / 2; grid-row: 2 / 3; }
+#dna-aesthetic { grid-column: 1 / 2; grid-row: 3 / 4; }
+
+#dna-fonts     { grid-column: 2 / 3; grid-row: 1 / 2; }
+#dna-values    { grid-column: 2 / 3; grid-row: 2 / 3; }
+#dna-tone      { grid-column: 2 / 3; grid-row: 3 / 4; }
+
+/* Image col spans 3 rows to match height */
+#dna-images    { grid-column: 3 / 4; grid-row: 1 / span 3; } 
+
+/* Overview spans full width on a new row */
+#dna-overview  { grid-column: 1 / -1; grid-row: 4 / 5; }
+
+/* --- Card Specific Tweaks --- */
+
+/* Card: Logo (NEW LAYOUT) */
+.project-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+.logo-placeholder {
+    flex-shrink: 0; /* Prevents logo from shrinking */
+    width: 80px;
+    height: 80px;
+    border-radius: 8px; /* Rounded corners for logo */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-border-subtle);
+}
+.logo-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+#dna-project a {
+    font-size: 0.9rem;
+    display: block;
+    word-break: break-all;
+}
+#dna-project .tagline-display {
+    margin-top: 0;
+    font-size: 1.4rem;
+    line-height: 1.4;
+}
+
+/* Card: Fonts (NEW LAYOUT) */
+.font-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.font-display .font-name {
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+.font-display .font-example-playfair {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    line-height: 1.2;
+    color: var(--color-primary);
+    word-break: break-word;
+}
+.font-display .font-example-lato {
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+/* Card: Images (6-IMAGE GRID) */
+.image-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    height: 100%; /* Fill the card */
+}
+.image-grid img {
+    width: 100%;
+    height: 100%;
+    min-height: 120px; /* Min height for each image */
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: var(--color-border-subtle);
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+.image-grid img:hover {
+    opacity: 0.8;
+}
+/* Make the image card fill height */
+#dna-images {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card: Colors */
+.color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.color-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+.color-swatch .swatch-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+.color-swatch span {
+    font-size: 0.8rem;
+    color: #888;
+}
+.swatch-circle[data-hex="#F5F0E9"] { background-color: #F5F0E9; }
+.swatch-circle[data-hex="#1A1A1A"] { background-color: #1A1A1A; border: 1px solid var(--color-border-light); }
+.swatch-circle[data-hex="#8C2B28"] { background-color: #8C2B28; }
+.swatch-circle[data-hex="#A18B56"] { background-color: #A18B56; }
+.swatch-circle[data-hex="#B0B4B8"] { background-color: #B0B4B8; }
+
+/* Card: Tagline */
+.tagline-display {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    color: var(--color-primary);
+    line-height: 1.3;
+}
+
+/* Card: Tags (Values, Aesthetic, Tone) */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+}
+.tag-list li {
+    background-color: var(--color-border-subtle);
+    border: 1px solid var(--color-border-light);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--color-primary);
+}
+
+/* Card: Overview */
+#dna-overview p {
+    color: var(--color-primary);
+}
+#dna-overview p strong {
+    color: var(--color-secondary);
+    font-weight: 400;
+}
+
+/* Page 3 Footer */
+#page-3 .page-footer {
+    width: 100%;
+    text-align: center;
+    margin: 3rem 0;
+    border-top: 1px solid var(--color-border-subtle);
+    padding-top: 2rem;
+}
+
+
+/* --- 8. Page 4: Suggestions --- */
+
+.home-header {
+    width: 100%;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.home-header .logo-text {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    letter-spacing: 1px;
+}
+
+.campaign-prompt {
+    width: 100%;
+    max-width: 800px;
+    margin: 1rem auto 3rem auto;
+}
+
+.campaign-prompt h2 {
+    font-size: 2.5rem;
+}
+
+.prompt-form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.prompt-form input[type="text"] {
+    flex-grow: 1;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-primary);
+    padding: 0 1.5rem;
+    border-radius: 30px;
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    min-height: 50px;
+}
+
+.suggestions-section {
+    width: 100%;
+}
+
+.suggestions-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* --- With This --- */
+
+.suggestion-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+    /* Cards are now visible by default, no animations */
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+.suggestion-card.loaded {
+    /* This class is now only used by the JS to control image loading */
+}
+
+.suggestion-image {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-border-subtle);
+    /* NEW 1:1 Aspect Ratio */
+    aspect-ratio: 1 / 1;
+}
+
+.suggestion-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-bottom: 1px solid var(--color-border-subtle);
+    cursor: pointer;
+    transition: opacity 0.5s ease, filter 0.5s ease;
+    
+    /* Hidden by default for loading anim */
+    opacity: 0;
+}
+
+/* NEW Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-border-subtle);
+    transition: opacity 0.5s ease;
+    z-index: 2;
+}
+/* When card is loaded, fade out overlay */
+.suggestion-card.loaded .loading-overlay {
+    opacity: 0;
+    pointer-events: none;
+}
+/* When card is loaded, fade in image */
+.suggestion-card.loaded .suggestion-image img {
+    opacity: 1;
+}
+
+.suggestion-image img:hover {
+    opacity: 0.8 !important; /* Ensure hover works after load */
+}
+
+.suggestion-content {
+    padding: 1.5rem;
+}
+.suggestion-content h3 {
+    font-family: var(--font-primary);
+    font-size: 1.4rem;
+    color: var(--color-primary);
+}
+.suggestion-content p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+
+/* --- 9. Lightbox Styles (NEW) --- */
+
+#lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+    
+    display: none; 
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#lightbox-close {
+    position: absolute;
+    top: 2rem;
+    right: 3rem;
+    font-size: 3rem;
+    color: var(--color-secondary);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+    z-index: 1002;
+}
+#lightbox-close:hover {
+    color: var(--color-primary);
+}
+
+/* New wrapper for framed content */
+#lightbox-wrapper {
+    background-color: var(--color-bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+#lightbox-content {
+    position: relative;
+    width: 100%;
+    /* Image will define height */
+}
+
+#lightbox-image {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+    background-color: #000;
+}
+
+/* New caption box */
+#lightbox-caption {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--color-border-subtle);
+    display: none; /* Hidden by default */
+}
+#lightbox-caption h3 {
+    font-size: 1.4rem;
+    color: var(--color-primary);
+}
+#lightbox-caption p {
+    font-size: 1rem;
+    color: var(--color-secondary);
+    margin-bottom: 0;
+}
+
+
+/* --- 10. Responsive Design --- */
+
+@media (max-width: 900px) {
+    /* Change Page 3 grid to 2 columns */
+    .dna-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto; /* Reset rows */
+    }
+    
+    .dna-card {
+        grid-column: auto !important;
+        grid-row: auto !important;
+    }
+    
+    #dna-images, #dna-overview {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .center-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .back-button {
+        position: static;
+        display: inline-block;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+    }
+    
+    #page-3 .container,
+    #page-4 .container {
+        padding: 0.5rem;
+    }
+
+    /* Change Page 3 grid to 1 column */
+    .dna-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .prompt-form {
+        flex-direction: column;
+    }
+    .prompt-form input[type="text"] {
+        padding: 1rem 1.5rem;
+    }
+    
+    #lightbox-close {
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2.5rem;
+    }
+    
+    #lightbox-wrapper {
+        max-width: 95vw;
+    }
+    #lightbox-caption {
+        padding: 1rem 1.5rem;
+    }
+}
